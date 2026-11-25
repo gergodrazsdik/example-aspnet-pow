@@ -60,6 +60,74 @@ public sealed class ProofOfWork(IDataProtectionProvider protection, TimeProvider
         return new ProofChallenge("SHA-256", challenge, salt, MaxNumber, _protector.Protect($"{challenge}\n{salt}"));
     }
 
+    /// <summary>Checks an answer in one pass.</summary>
+    /// <param name="purpose">What the answer is used for.</param>
+    /// <param name="answer">The answer: <c>number:signature</c>.</param>
+    /// <param name="cancellationToken">Stops the check.</param>
+    /// <returns>True when the answer is right, in time and for this purpose.</returns>
+    public Task<bool> VerifyAsync(string purpose, string? answer, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Check(purpose, answer) is not null);
+    }
+
+    // Everything but the once-only check: parse, unprotect, purpose, expiry, hash.
+    private (string Challenge, DateTimeOffset Expires)? Check(string purpose, string? answer)
+    {
+        if (!TryRead(answer, out var number, out var signature) || Unprotect(signature) is not { } payload)
+        {
+            return null;
+        }
+
+        // The payload is what Create signed: "challenge\nsalt". Only the signed salt is used from here on.
+        var lines = payload.Split('\n');
+        var parts = lines.Length == 2 ? lines[1].Split('.') : [];
+        if (parts.Length != 3
+            || !string.Equals(parts[0], purpose, StringComparison.Ordinal)
+            || !long.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var seconds))
+        {
+            return null;
+        }
+
+        var expires = DateTimeOffset.FromUnixTimeSeconds(seconds);
+        var (challenge, salt) = (lines[0], lines[1]);
+        if (expires < time.GetUtcNow()
+            || !CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(HashOf(salt, number)), Encoding.ASCII.GetBytes(challenge)))
+        {
+            return null;
+        }
+
+        return (challenge, expires);
+    }
+
+    private static bool TryRead(string? answer, out int number, out string signature)
+    {
+        number = 0;
+        signature = "";
+        var colon = answer?.IndexOf(':', StringComparison.Ordinal) ?? -1;
+        if (answer is null || answer.Length > 1024 || colon <= 0
+            || !int.TryParse(answer.AsSpan(0, colon), NumberStyles.None, CultureInfo.InvariantCulture, out number))
+        {
+            return false;
+        }
+
+        signature = answer[(colon + 1)..];
+        return signature.Length > 0;
+    }
+
+    private string? Unprotect(string signature)
+    {
+        try
+        {
+            return _protector.Unprotect(signature);
+        }
+        catch (CryptographicException)
+        {
+            // Not ours, altered, or signed with a key we don't have.
+            return null;
+        }
+    }
+
     /// <summary>The hash of a salt followed by a number, as the browser computes it.</summary>
     /// <returns>Lowercase hex.</returns>
     public static string HashOf(string salt, int number) =>
