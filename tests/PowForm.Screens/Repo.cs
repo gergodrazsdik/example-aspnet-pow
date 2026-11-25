@@ -23,6 +23,8 @@ internal static class Repo
         return Path.Combine(folder, name);
     }
 
+    public static string Measurements => Path.Combine(Output, "measurements");
+
     private static string FindRoot()
     {
         var folder = new DirectoryInfo(AppContext.BaseDirectory);

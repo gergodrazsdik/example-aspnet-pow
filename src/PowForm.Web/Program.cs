@@ -20,6 +20,17 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keys));
 
 var app = builder.Build();
+
+// Strict CSP: no inline script or style. The worker needs worker-src (it falls back to
+// script-src, then default-src, when worker-src is missing).
+app.Use((context, next) =>
+{
+    context.Response.Headers.ContentSecurityPolicy =
+        "default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; " +
+        "img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
+    return next();
+});
+
 app.UseStaticFiles();
 
 // A challenge for a form: nothing is stored; the signature is what lets the server check the answer later.
