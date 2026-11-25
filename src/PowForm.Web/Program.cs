@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages()
     // The forms use server-side validation only: no jQuery validation script, so no data-val attributes.
     .AddViewOptions(options => options.HtmlHelperOptions.ClientValidationEnabled = false);
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true); // /contact, not /Contact
 builder.Services.AddSingleton<MessageBoard>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<ProofOptions>(builder.Configuration.GetSection("Proof"));

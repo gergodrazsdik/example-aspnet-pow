@@ -6,12 +6,16 @@
 
 <h1>Contact</h1>
 
-@if (!ModelState.IsValid)
+@if (Model.ProofProblem is not null)
+{
+    <p class="notice error" role="alert">@Model.ProofProblem</p>
+}
+else if (!ModelState.IsValid)
 {
     <p class="notice error" role="alert">Your message was not sent. See the notes below.</p>
 }
 
-<form method="post" asp-antiforgery="false">
+<form method="post" asp-antiforgery="false" data-proof="contact">
     <div class="field">
         <label asp-for="Name">Name</label>
         <input asp-for="Name" required aria-describedby="Name-error" aria-invalid="@Invalid("Name")">
@@ -27,6 +31,7 @@
         <textarea asp-for="Message" rows="6" required aria-describedby="Message-error" aria-invalid="@Invalid("Message")"></textarea>
         <span asp-validation-for="Message" id="Message-error" class="field-error"></span>
     </div>
+    <partial name="_Proof" for="Proof" />
     <button type="submit">Send</button>
 </form>
 

@@ -1,0 +1,9 @@
+@model string?
+@* The hidden field the script fills, the live region it reports in, and a note for visitors without
+   JavaScript. A value the server sends back (a post refused for its text) stays, so the answer isn't wasted.
+   The input is written by hand on purpose: with asp-for, the tag helper shows the value posted (ModelState)
+   and ignores the model, so setting Proof = null after a refusal would not clear it, and the name would
+   be "Proof", not the "proof" that proof.js looks for. *@
+<input type="hidden" name="proof" value="@Model">
+<p class="status" data-proof-status data-waiting="Just a moment, checking that you are not a bot…" aria-live="polite"></p>
+<noscript><p class="notice error">This form needs JavaScript to prove that you are not a bot.</p></noscript>

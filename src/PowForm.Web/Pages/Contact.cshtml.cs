@@ -7,7 +7,7 @@ namespace PowForm.Web.Pages;
 // Antiforgery is off: the form has no session or cookie to forge a request against, and the
 // example is about the proof of work, not CSRF.
 [IgnoreAntiforgeryToken]
-public class ContactModel(MessageBoard board, ILogger<ContactModel> log) : PageModel
+public class ContactModel(ProofOfWork proof, MessageBoard board, ILogger<ContactModel> log) : PageModel
 {
     [BindProperty]
     [Required(ErrorMessage = "Please enter your name.")]
@@ -24,15 +24,32 @@ public class ContactModel(MessageBoard board, ILogger<ContactModel> log) : PageM
     [StringLength(2000, ErrorMessage = "Please keep your message under 2,000 characters.")]
     public string? Message { get; set; }
 
+    /// <summary>The proof of work's answer, <c>number:signature</c>, from the form's hidden field.</summary>
+    [BindProperty]
+    public string? Proof { get; set; }
+
+    /// <summary>Why the proof was refused, for the visitor.</summary>
+    public string? ProofProblem { get; private set; }
+
     public void OnGet()
     {
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        // Fields first: a post refused for its text keeps its answer (verifying uses it up).
         if (!ModelState.IsValid)
         {
             Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+            return Page();
+        }
+
+        // The proof last, just before saving.
+        if (await proof.ProblemAsync("contact", Proof, cancellationToken) is { } problem)
+        {
+            ProofProblem = problem;
+            Proof = null;
+            Response.StatusCode = StatusCodes.Status403Forbidden;
             return Page();
         }
 

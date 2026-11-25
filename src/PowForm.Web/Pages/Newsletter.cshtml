@@ -1,0 +1,36 @@
+@page
+@model NewsletterModel
+@{
+    ViewData["Title"] = "Newsletter";
+}
+
+<h1>Newsletter</h1>
+
+@if (Model.Subscribed)
+{
+    <p class="notice ok" role="status">Thank you, you are on the list.</p>
+}
+
+@if (Model.ProofProblem is not null)
+{
+    <p class="notice error" role="alert">@Model.ProofProblem</p>
+}
+else if (!ModelState.IsValid)
+{
+    <p class="notice error" role="alert">You were not subscribed. See the note below.</p>
+}
+
+<form method="post" asp-antiforgery="false" data-proof="newsletter">
+    <div class="field">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" required aria-describedby="Email-error" aria-invalid="@Invalid("Email")">
+        <span asp-validation-for="Email" id="Email-error" class="field-error"></span>
+    </div>
+    <partial name="_Proof" for="Proof" />
+    <button type="submit">Subscribe</button>
+</form>
+
+@functions {
+    // aria-invalid on a refused field, so a screen reader announces it with the note it points to.
+    private string? Invalid(string field) => ModelState[field]?.Errors.Count > 0 ? "true" : null;
+}

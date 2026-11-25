@@ -115,3 +115,9 @@ button:hover {
   font-size: 0.85rem;
   margin-left: 0.4rem;
 }
+
+.status {
+  min-height: 1.5rem;
+  margin: 0 0 0.75rem;
+  color: #55606e;
+}
