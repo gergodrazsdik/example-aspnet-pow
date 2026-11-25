@@ -8,6 +8,7 @@ builder.Services.AddRazorPages()
 builder.Services.AddSingleton<MessageBoard>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<ProofOptions>(builder.Configuration.GetSection("Proof"));
+builder.Services.AddSingleton<IUsedChallenges, InMemoryUsedChallenges>();
 builder.Services.AddSingleton<ProofOfWork>();
 
 // The signature on a challenge is Data Protection, so the keys must survive a restart and, in

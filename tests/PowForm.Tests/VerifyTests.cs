@@ -9,8 +9,8 @@ public class VerifyTests
     private readonly TestTime _time = new();
     private readonly EphemeralDataProtectionProvider _keys = new();
 
-    private ProofOfWork Make(IDataProtectionProvider? keys = null) =>
-        new(keys ?? _keys, _time, Options.Create(new ProofOptions { MaxNumber = 1000 }));
+    private ProofOfWork Make(IDataProtectionProvider? keys = null, IUsedChallenges? store = null) =>
+        new(keys ?? _keys, store ?? new InMemoryUsedChallenges(_time), _time, Options.Create(new ProofOptions { MaxNumber = 1000 }));
 
     private static string Answer(ProofChallenge challenge) =>
         Solver.Solve(challenge) ?? throw new InvalidOperationException("No number matches.");
@@ -25,7 +25,7 @@ public class VerifyTests
     }
 
     [Test]
-    public async Task Another_replica_with_the_same_keys_accepts_it()
+    public async Task Another_instance_with_the_same_keys_accepts_it()
     {
         // The point of signing with Data Protection: a second instance never saw the challenge.
         var answer = Answer(Make().Create("contact"));

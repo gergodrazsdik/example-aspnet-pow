@@ -8,7 +8,7 @@ namespace PowForm.Tests;
 public partial class ChallengeTests
 {
     private static ProofOfWork Make(int maxNumber = 1000, TimeProvider? time = null) =>
-        new(new EphemeralDataProtectionProvider(), time ?? new TestTime(), Options.Create(new ProofOptions { MaxNumber = maxNumber }));
+        new(new EphemeralDataProtectionProvider(), new InMemoryUsedChallenges(time ?? new TestTime()), time ?? new TestTime(), Options.Create(new ProofOptions { MaxNumber = maxNumber }));
 
     [Test]
     public async Task A_challenge_has_the_scheme_s_shape()

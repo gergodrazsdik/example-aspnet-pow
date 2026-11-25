@@ -30,7 +30,7 @@ public sealed record ProofChallenge(string Algorithm, string Challenge, string S
 /// matches. The signature is Data Protection over the hash and the salt, so any replica can check an
 /// answer without having stored the challenge. The salt carries the purpose and the expiry.
 /// </summary>
-public sealed class ProofOfWork(IDataProtectionProvider protection, TimeProvider time, IOptions<ProofOptions> options)
+public sealed class ProofOfWork(IDataProtectionProvider protection, IUsedChallenges used, TimeProvider time, IOptions<ProofOptions> options)
 {
     /// <summary>The purposes a challenge can be for. An answer works only for the purpose it was issued for.</summary>
     public static readonly IReadOnlySet<string> Purposes = new HashSet<string>(StringComparer.Ordinal) { "contact", "newsletter" };
@@ -60,18 +60,18 @@ public sealed class ProofOfWork(IDataProtectionProvider protection, TimeProvider
         return new ProofChallenge("SHA-256", challenge, salt, MaxNumber, _protector.Protect($"{challenge}\n{salt}"));
     }
 
-    /// <summary>Checks an answer in one pass.</summary>
+    /// <summary>Checks an answer in one pass, and marks its challenge used.</summary>
     /// <param name="purpose">What the answer is used for.</param>
     /// <param name="answer">The answer: <c>number:signature</c>.</param>
     /// <param name="cancellationToken">Stops the check.</param>
-    /// <returns>True when the answer is right, in time and for this purpose.</returns>
-    public Task<bool> VerifyAsync(string purpose, string? answer, CancellationToken cancellationToken = default)
+    /// <returns>True when the answer is right, in time, for this purpose and not used before.</returns>
+    public async Task<bool> VerifyAsync(string purpose, string? answer, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(Check(purpose, answer) is not null);
+        return Check(purpose, answer) is var (challenge, expires)
+            && await used.TryUseAsync(challenge, expires, cancellationToken);
     }
 
-    // Everything but the once-only check: parse, unprotect, purpose, expiry, hash.
+    // Everything but the once-only check, which VerifyAsync does last: parse, unprotect, purpose, expiry, hash.
     private (string Challenge, DateTimeOffset Expires)? Check(string purpose, string? answer)
     {
         if (!TryRead(answer, out var number, out var signature) || Unprotect(signature) is not { } payload)
