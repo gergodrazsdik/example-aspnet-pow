@@ -3,6 +3,7 @@
     <Project Path="src/PowForm.Web/PowForm.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/PowForm.Tests/PowForm.Tests.csproj" />
     <Project Path="tests/PowForm.Screens/PowForm.Screens.csproj" />
   </Folder>
 </Solution>
