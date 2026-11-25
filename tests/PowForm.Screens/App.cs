@@ -22,11 +22,15 @@ public sealed class App : IAsyncDisposable
 
     public Uri Url { get; }
 
-    /// <summary>Starts the app. Settings use the configuration key with "__" for ":" (Proof__MaxNumber).</summary>
-    public static async Task<App> StartAsync(IReadOnlyDictionary<string, string>? settings = null)
+    /// <summary>
+    /// Starts the app. Settings use the configuration key with "__" for ":" (Proof__MaxNumber).
+    /// With a publicHost (a LAN address) it listens on every interface and its Url uses that host.
+    /// </summary>
+    public static async Task<App> StartAsync(IReadOnlyDictionary<string, string>? settings = null, string? publicHost = null)
     {
         var port = FreePort();
-        var url = new Uri($"http://localhost:{port}");
+        var url = new Uri($"http://{publicHost ?? "localhost"}:{port}");
+        var listen = publicHost is null ? url.ToString() : $"http://0.0.0.0:{port}";
         var keys = Directory.CreateTempSubdirectory("powform-keys-").FullName;
         var start = new ProcessStartInfo("dotnet")
         {
@@ -35,7 +39,7 @@ public sealed class App : IAsyncDisposable
         };
         start.ArgumentList.Add(Path.Combine(Repo.Root, "artifacts", "bin", "PowForm.Web", Repo.Configuration, "PowForm.Web.dll"));
         start.ArgumentList.Add("--urls");
-        start.ArgumentList.Add(url.ToString());
+        start.ArgumentList.Add(listen);
         start.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
         start.Environment["DataProtection__KeysPath"] = keys;
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
