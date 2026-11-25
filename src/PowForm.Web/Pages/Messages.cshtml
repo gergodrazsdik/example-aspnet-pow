@@ -1,0 +1,26 @@
+@page
+@model MessagesModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Messages";
+}
+
+<h1>Messages</h1>
+
+@if (Model.Sent)
+{
+    <p class="notice ok" role="status">Thank you, your message was sent.</p>
+}
+
+<p class="count">@Model.Latest.Count accepted so far (newest first, at most 20 shown).</p>
+
+<ul class="messages">
+    @foreach (var message in Model.Latest.Take(20))
+    {
+        <li>
+            <strong>@message.Name</strong> &lt;@message.Email&gt;
+            <time>@message.At.ToString("HH:mm:ss", CultureInfo.InvariantCulture)</time><br>
+            @message.Message
+        </li>
+    }
+</ul>

@@ -1,0 +1,18 @@
+<Project>
+  <!-- Shared by every project. Package versions live in Directory.Packages.props. -->
+  <PropertyGroup>
+    <!-- .NET 11. Everything this example uses works the same on .NET 10 (LTS): change it here
+    and in global.json. -->
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Build output under artifacts/ instead of bin/ and obj/ in every project. -->
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+
+    <!-- Known vulnerabilities in direct and transitive packages fail the build. -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+  </PropertyGroup>
+</Project>

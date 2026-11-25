@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Browser tests and screenshots: they start the app, drive it in Chromium (Firefox and WebKit
+    where installed) and save the pictures the article shows. See README.md.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit.Playwright" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The tests start the app's build output as a process, so build it first; no reference to its code. -->
+    <ProjectReference Include="../../src/PowForm.Web/PowForm.Web.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

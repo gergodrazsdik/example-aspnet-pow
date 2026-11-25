@@ -1,0 +1,36 @@
+@page
+@model ContactModel
+@{
+    ViewData["Title"] = "Contact";
+}
+
+<h1>Contact</h1>
+
+@if (!ModelState.IsValid)
+{
+    <p class="notice error" role="alert">Your message was not sent. See the notes below.</p>
+}
+
+<form method="post" asp-antiforgery="false">
+    <div class="field">
+        <label asp-for="Name">Name</label>
+        <input asp-for="Name" required aria-describedby="Name-error" aria-invalid="@Invalid("Name")">
+        <span asp-validation-for="Name" id="Name-error" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" required aria-describedby="Email-error" aria-invalid="@Invalid("Email")">
+        <span asp-validation-for="Email" id="Email-error" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Message">Message</label>
+        <textarea asp-for="Message" rows="6" required aria-describedby="Message-error" aria-invalid="@Invalid("Message")"></textarea>
+        <span asp-validation-for="Message" id="Message-error" class="field-error"></span>
+    </div>
+    <button type="submit">Send</button>
+</form>
+
+@functions {
+    // aria-invalid on a refused field, so a screen reader announces it with the note it points to.
+    private string? Invalid(string field) => ModelState[field]?.Errors.Count > 0 ? "true" : null;
+}

@@ -1,0 +1,14 @@
+# Build output
+artifacts/
+bin/
+obj/
+.vs/
+*.user
+TestResults/
+
+# Playwright traces
+playwright-traces/
+*.trace.zip
+
+# The app's local data (Data Protection keys)
+App_Data/

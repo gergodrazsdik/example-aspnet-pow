@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PowForm.Web/PowForm.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PowForm.Screens/PowForm.Screens.csproj" />
+  </Folder>
+</Solution>

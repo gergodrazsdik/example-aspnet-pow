@@ -1,0 +1,10 @@
+<Project>
+  <!-- Central package management: versions here, PackageReference without Version in the projects. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Browser tests and screenshots: TUnit with Playwright. -->
+    <PackageVersion Include="TUnit.Playwright" Version="1.83.0" />
+  </ItemGroup>
+</Project>
